@@ -1,7 +1,8 @@
 # compiled output
 /dist
 /node_modules
-
+/src/models
+/src/scripts/__pycache__
 # Logs
 logs
 *.log

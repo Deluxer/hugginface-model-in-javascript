@@ -10,6 +10,10 @@ export class AppService {
 
   async getVector() {
     const transformer = await import('@xenova/transformers')
+    Object.assign(transformer.env, {
+      localModelPath: 'src/models',
+      allowRemoteModels: false
+    });
     const model = await transformer.pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
 
   
