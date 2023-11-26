@@ -22,8 +22,27 @@ $ yarn install
 ## Env
 ```bash
 copy .env.example and rename to .env
-Set variables
+MONGODB_ATLAS_URI='uri'
 ```
+
+## Download Huggingface Model
+```bash
+cd src/
+python -m scripts.convert --quantize --model_id Xenova/all-MiniLM-L6-v2
+```
+Use Conda environment
+```bash
+conda create --name vectors python=3.10.12
+conda activate vectors
+
+pip install transformers==4.33.2
+pip install onnxruntime==1.15.0
+pip install optimum==1.13.2
+pip install tqdm
+pip install onnx==1.13.1
+
+```
+
 
 ## Running the app
 
@@ -41,8 +60,8 @@ $ yarn run start:prod
 
 ## Endpoint
 ```json
-http://localhost:3000/vectors
-http://localhost:3000/vectors/search?word=red
+GET http://localhost:3000/vectors
+GET http://localhost:3000/vectors/search?word=red
 ```
 
 
