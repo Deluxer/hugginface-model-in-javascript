@@ -25,6 +25,7 @@
     "@nestjs/platform-express": "^10.0.0",
     "@xenova/transformers": "^2.7.0",
     "csv-parser": "^3.0.0",
+    "mongoose": "^8.0.1",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1"
   },
