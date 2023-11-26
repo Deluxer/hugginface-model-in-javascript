@@ -12,7 +12,7 @@ export class AppService {
       allowRemoteModels: false
     });
     const model = await transformer.pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
-    const client = new MongoClient('mongodb+srv://user_embeddings:ZCf3sb9F0AuW0byV@embeddings.t5mnu11.mongodb.net/?retryWrites=true&w=majority')
+    const client = new MongoClient(process.env.MONGODB_ATLAS_URI || "")
     await client.connect()
     const collection = client.db('embeddings').collection('spotify-songs')
   
