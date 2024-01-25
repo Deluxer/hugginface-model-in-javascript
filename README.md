@@ -60,7 +60,7 @@ $ yarn run start:prod
 
 ## Endpoint
 ```json
-GET http://localhost:3000/vectors
+POST http://localhost:3000/vectors
 GET http://localhost:3000/vectors/search?word=red
 ```
 
