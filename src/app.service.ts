@@ -5,7 +5,8 @@ import { MongoClient } from 'mongodb';
 
 @Injectable()
 export class AppService {
-  async getVector() {
+
+  async dataLoader() {
     const transformer = await import('@xenova/transformers')
     Object.assign(transformer.env, {
       localModelPath: 'src/models',
@@ -14,15 +15,19 @@ export class AppService {
     const model = await transformer.pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
     const client = new MongoClient(process.env.MONGODB_ATLAS_URI || "")
     await client.connect()
-    const collection = client.db('embeddings').collection('spotify-songs')
+    const collection = client.db('songs').collection('spotify-songs')
   
     const data = [];
-    const spotify_songs = [];
-    const spotify_songs_limit = [];
+    type items = {name: string, artists:string}
+    const all_items:items[] = [];
+    const items_limit = [];
     const dataStream = fs.createReadStream('src/dataset/universal_top_spotify_songs.csv')
-      .pipe(csvParser())
+      .pipe(csvParser({ 
+        separator: ';',
+        mapHeaders: ({ header }) => header.toLowerCase().replace(/'/g, '')
+      }))
       .on('data', (row) => {
-        spotify_songs.push(row.name);
+        all_items.push({name: row.name, artists: row.artists});
       })
       .on('end', () => {
         console.log('Lectura de CSV finalizada');
@@ -33,23 +38,27 @@ export class AppService {
       dataStream.on('error', reject);
     });
 
-    spotify_songs.map((name, index) => {
-      if (index >= 3 && index < 500 ) {
-        spotify_songs_limit.push(name);
-      } else {
-        return;
-      }
-    });
 
-    for (const name of spotify_songs_limit) {
+    // Load items by sections
+    // all_items.forEach((name, index) => {
+    //   if (index >= 0 && index <= 100 ) {
+    //     items_limit.push(name);
+    //   } else {
+    //     return;
+    //   }
+    // });
+
+    // console.log(items_limit);
+
+    for (const product of all_items) {
+
       try {
-        const embeddings = await model(name, { pooling: 'mean', normalize: true });
+        const embeddings = await model(product.name, { pooling: 'mean', normalize: true });
 
         await collection.insertOne({
-          name: name,
-          dims: embeddings.dims,
-          embeddings: Object.values(embeddings.data),
-          size: embeddings.size,
+          name: product.name,
+          price: product.artists,
+          embedding: Object.values(embeddings.data),
         });
 
       } catch (error) {
@@ -57,7 +66,7 @@ export class AppService {
       }
     }
 
-    return data;
+    return 'data';
   }
 
   async semanticSearch(word: string) {
@@ -67,9 +76,13 @@ export class AppService {
       allowRemoteModels: false
     });
     const model = await transformer.pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
-    const client = new MongoClient('mongodb+srv://user_embeddings:ZCf3sb9F0AuW0byV@embeddings.t5mnu11.mongodb.net/?retryWrites=true&w=majority')
+    
+    // Info about the model
+    // const config = transformer.AutoConfig.from_pretrained('bert-base-uncased');
+    
+    const client = new MongoClient(process.env.MONGODB_ATLAS_URI || "")
     await client.connect()
-    const collection = client.db('embeddings').collection('spotify-songs')
+    const collection = client.db('songs').collection('spotify-songs')
 
     const embeddings = await model(word, { pooling: 'mean', normalize: true });
     const queryVector = Object.values(embeddings.data);

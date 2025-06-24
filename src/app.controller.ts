@@ -5,12 +5,12 @@ import { AppService } from './app.service';
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Post('vectors')
+  @Post('data-loader')
   getVector() {
-    return this.appService.getVector();
+    return this.appService.dataLoader();
   }
 
-  @Get('vectors/search')
+  @Get('vector/search')
   search(@Query('word') word: string) {
     return this.appService.semanticSearch(word);
   }
